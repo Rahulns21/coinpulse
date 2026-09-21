@@ -21,6 +21,7 @@ const Header = () => {
         <nav>
           <Link
             href="/"
+            aria-current="page"
             className={cn("nav-link", {
               "is-active": pathname === "/",
               "is-home": true,
@@ -31,6 +32,7 @@ const Header = () => {
           <p>Search Modal</p>
           <Link
             href="/coins"
+            aria-current="page"
             className={cn("nav-link", {
               "is-active": pathname === "/coins",
             })}
