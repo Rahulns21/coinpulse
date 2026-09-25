@@ -15,16 +15,18 @@ const Header = () => {
             alt="CoinPulse logo"
             width={132}
             height={40}
+            priority
+            style={{ width: "auto", height: "auto" }}
           />
         </Link>
 
         <nav>
           <Link
             href="/"
-            aria-current="page"
+            aria-current={pathname === "/" ? "page" : undefined}
             className={cn("nav-link", {
               "is-active": pathname === "/",
-              "is-home": true,
+              "is-home": pathname === "/",
             })}
           >
             Home
@@ -32,7 +34,7 @@ const Header = () => {
           <p>Search Modal</p>
           <Link
             href="/coins"
-            aria-current="page"
+            aria-current={pathname === "/coins" ? "page" : undefined}
             className={cn("nav-link", {
               "is-active": pathname === "/coins",
             })}
