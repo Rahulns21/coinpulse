@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { TrendingDown, TrendingUp } from "lucide-react";
 import { cn } from "cn";
+import { formatCurrency } from "@/lib/utils";
 
 const columns: DataTableColumn<TrendingCoin>[] = [
   {
@@ -49,7 +50,7 @@ const columns: DataTableColumn<TrendingCoin>[] = [
   {
     header: "Price",
     cellClassName: "price-cell",
-    cell: (coin) => coin.item.data.price,
+    cell: (coin) => formatCurrency(coin.item.data.price),
   },
 ];
 
@@ -63,7 +64,7 @@ const TrendingCoins = async () => {
   return (
     <div id="trending-coins">
       <h4>Trending Coins</h4>
-      <div id="trending-coins">
+      <div>
         <DataTable
           data={trendingCoins.coins.slice(0, 6) || []}
           columns={columns}
