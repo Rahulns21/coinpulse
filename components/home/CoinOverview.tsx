@@ -4,7 +4,7 @@ import Image from "next/image";
 import CandleStickChart from "../CandleStickChart";
 
 const CoinOverview = async () => {
-  const [coin, coinOHLCData] = await Promise.all([
+  const [coinResult, ohlcResult] = await Promise.allSettled([
     fetcher<CoinDetailsData>("/coins/bitcoin", {
       dex_pair_format: "symbol",
     }),
@@ -14,6 +14,13 @@ const CoinOverview = async () => {
       precision: "full",
     }),
   ]);
+
+  if (coinResult.status === "rejected") {
+    throw coinResult.reason;
+  }
+
+  const coin = coinResult.value;
+  const coinOHLCData = ohlcResult.status === "fulfilled" ? ohlcResult.value : [];
 
   const formattedCurrency = formatCurrency(
     coin.market_data.current_price.usd

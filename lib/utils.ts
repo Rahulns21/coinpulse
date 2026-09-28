@@ -1,4 +1,5 @@
 import { Time } from 'lightweight-charts';
+import type { CandlestickData } from "lightweight-charts";
 
 export function formatCurrency(
   value: number | null | undefined,
@@ -6,19 +7,17 @@ export function formatCurrency(
   currency?: string,
   showSymbol?: boolean,
 ) {
-  if (value === null || value === undefined || isNaN(value)) {
-    return showSymbol !== false ? '$0.00' : '0.00';
-  }
+  const safeValue = value === null || value === undefined || isNaN(value) ? 0 : value;
 
   if (showSymbol === undefined || showSymbol === true) {
-    return value.toLocaleString(undefined, {
+    return safeValue.toLocaleString(undefined, {
       style: 'currency',
       currency: currency?.toUpperCase() || 'USD',
       minimumFractionDigits: digits ?? 2,
       maximumFractionDigits: digits ?? 2,
     });
   }
-  return value.toLocaleString(undefined, {
+  return safeValue.toLocaleString(undefined, {
     minimumFractionDigits: digits ?? 2,
     maximumFractionDigits: digits ?? 2,
   });
@@ -63,16 +62,14 @@ export function timeAgo(date: string | number | Date): string {
   return past.toISOString().split('T')[0];
 }
 
-export function convertOHLCData(data: OHLCData[]) {
-  return data
-    .map((d) => ({
-      time: d[0] as Time, // ensure seconds, not ms
-      open: d[1],
-      high: d[2],
-      low: d[3],
-      close: d[4],
-    }))
-    .filter((item, index, arr) => index === 0 || item.time !== arr[index - 1].time);
+export function convertOHLCData(data: OHLCData[]): CandlestickData<Time>[] {
+  return data.map(([time, open, high, low, close]) => ({
+    time: Math.floor(time / 1000) as Time,
+    open,
+    high,
+    low,
+    close,
+  }));
 }
 
 export const ELLIPSIS = 'ellipsis' as const;

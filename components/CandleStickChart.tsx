@@ -27,12 +27,13 @@ const CandleStickChart = ({
   const chartRef = useRef<IChartApi | null>(null);
   const candleSeriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
 
-  const [loading, setLoading] = useState(false);
+  const requestIdRef = useRef(0);
   const [period, setPeriod] = useState(initialPeriod);
   const [ohlcData, setOhlcData] = useState<OHLCData[]>(data ?? []);
   const [isPending, startTransition] = useTransition();
 
-  const fetchOHLCData = async (selectedPeriod: Period) => {
+  const fetchOHLCData = async (selectedPeriod: Period): Promise<boolean> => {
+    const requestId = ++requestIdRef.current;
     try {
       const { days } = PERIOD_CONFIG[selectedPeriod];
 
@@ -42,18 +43,27 @@ const CandleStickChart = ({
         precision: "full",
       });
 
-      setOhlcData(newData ?? []);
+      if (requestId === requestIdRef.current) {
+        setOhlcData(newData ?? []);
+        return true;
+      }
+
+      return false;
     } catch (e) {
       console.error("Failed to fetch OHLCData", e);
+      return false;
     }
   };
 
   const handlePeriodChange = (newPeriod: Period) => {
     if (newPeriod === period) return;
 
+    const previousPeriod = period;
+
     startTransition(async () => {
       setPeriod(newPeriod);
-      await fetchOHLCData(newPeriod);
+      const ok = await fetchOHLCData(newPeriod);
+      if (!ok) setPeriod(previousPeriod);
     });
   };
 
@@ -61,10 +71,8 @@ const CandleStickChart = ({
     const container = chartContainerRef.current;
     if (!container) return;
 
-    const showTime = ["daily", "weekly", "monthly"].includes(period);
-
     const chart = createChart(container, {
-      ...getChartConfig(height, showTime),
+      ...getChartConfig(height, true),
       width: container.clientWidth,
     });
     const series = chart.addSeries(CandlestickSeries, getCandlestickConfig());
@@ -87,26 +95,25 @@ const CandleStickChart = ({
       chartRef.current = null;
       candleSeriesRef.current = null;
     };
-  }, [height]);
+  }, [height, ohlcData]);
+
+  useEffect(() => {
+    if (!chartRef.current) return;
+
+    const showTime = ["daily", "weekly", "monthly"].includes(period);
+
+    chartRef.current.timeScale().applyOptions({
+      timeVisible: showTime,
+    });
+  }, [period]);
 
   useEffect(() => {
     if (!candleSeriesRef.current) return;
 
-    const convertedToSeconds = ohlcData.map(
-      (item) =>
-        [
-          Math.floor(item[0] / 1000),
-          item[1],
-          item[2],
-          item[3],
-          item[4],
-        ] as OHLCData
-    );
-
-    const converted = convertOHLCData(convertedToSeconds);
+    const converted = convertOHLCData(ohlcData);
     candleSeriesRef.current.setData(converted);
     chartRef.current?.timeScale().fitContent();
-  }, [ohlcData, period]);
+  }, [ohlcData]);
 
   return (
     <div id="candlestick-chart">
@@ -124,7 +131,7 @@ const CandleStickChart = ({
                 period === value ? "config-button-active" : "config-button"
               }
               onClick={() => handlePeriodChange(value)}
-              disabled={loading}
+              disabled={isPending}
             >
               {label}
             </button>
