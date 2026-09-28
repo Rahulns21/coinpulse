@@ -4,9 +4,18 @@ import Image from "next/image";
 import { formatCurrency } from "@/lib/utils";
 import { cn } from "cn";
 import { TrendingDown, TrendingUp } from "lucide-react";
+import { CategoriesFallback } from "./fallback";
 
 const Categories = async () => {
-  const categories = await fetcher<Category[]>("/coins/categories");
+  let categories: Category[] = [];
+
+  try {
+    categories = await fetcher<Category[]>("/coins/categories");
+  } catch (e) {
+    console.error("Failed to fetch categories:", e);
+    return <CategoriesFallback />;
+  }
+
   const columns: DataTableColumn<Category>[] = [
     {
       header: "Category",
@@ -35,13 +44,13 @@ const Categories = async () => {
               isTrendingUp ? "text-green-500" : "text-red-500"
             )}
           >
-            <p className="flex gap-1 items-center">
+            <p className="flex items-center gap-1">
               {isTrendingUp ? (
-                  <TrendingUp width={16} height={16} />
-                ) : (
-                    <TrendingDown width={16} height={16} />
-                )}
-                {Math.abs(change).toFixed(2)}%
+                <TrendingUp width={16} height={16} />
+              ) : (
+                <TrendingDown width={16} height={16} />
+              )}
+              {Math.abs(change).toFixed(2)}%
             </p>
           </div>
         );
