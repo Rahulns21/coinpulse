@@ -1,6 +1,8 @@
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import Categories from "@/components/home/Categories";
 import CoinOverview from "@/components/home/CoinOverview";
 import {
+  CategoriesFallback,
   CoinOverviewFallback,
   TrendingCoinsFallback,
 } from "@/components/home/fallback";
@@ -25,7 +27,11 @@ const Page = async () => {
       </section>
 
       <section className="mt-7 w-full space-y-4">
-        <p>Categories</p>
+        <ErrorBoundary fallback={<CategoriesFallback />}>
+        <Suspense fallback={<CategoriesFallback />}>
+        <Categories />
+        </Suspense>
+        </ErrorBoundary>
       </section>
     </main>
   );
