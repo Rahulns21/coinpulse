@@ -118,3 +118,59 @@ export const CategoriesFallback = () => {
     </div>
   );
 };
+
+export const AllCoinsTableFallback = () => {
+  type FallbackRow = { id: number };
+
+  const columns: Column<FallbackRow>[] = [
+    {
+      header: "Rank",
+      cellClassName: "rank-cell",
+      cell: () => <div className="rank-line skeleton" />,
+    },
+    {
+      header: "Token",
+      cellClassName: "token-cell",
+      cell: () => (
+        <div className="token-info">
+          <div className="token-image skeleton" />
+          <div className="token-line skeleton" />
+        </div>
+      ),
+    },
+    {
+      header: "Price",
+      cellClassName: "price-cell",
+      cell: () => <div className="price-line skeleton" />,
+    },
+    {
+      header: "24h Change",
+      cellClassName: "change-cell",
+      cell: () => (
+        <div className="change-value">
+          <div className="change-line skeleton" />
+        </div>
+      ),
+    },
+    {
+      header: "Market Cap",
+      cellClassName: "market-cap-cell",
+      cell: () => <div className="market-cap-line skeleton" />,
+    },
+  ];
+
+  const dummyData: FallbackRow[] = Array.from({ length: 10 }, (_, i) => ({
+    id: i,
+  }));
+
+  return (
+    <div id="coins-table-fallback">
+      <DataTable
+        data={dummyData}
+        columns={columns}
+        rowKey={(item) => item.id}
+        tableClassName="coins-table"
+      />
+    </div>
+  );
+};
