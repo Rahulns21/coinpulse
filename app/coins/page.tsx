@@ -9,7 +9,9 @@ import Link from "next/link";
 
 const Page = async ({ searchParams }: NextPageProps) => {
   const { page } = await searchParams;
-  const currentPage = Number(page) || 1;
+  const parsedPage = Number(Array.isArray(page) ? page[0] : page);
+  const currentPage =
+    Number.isInteger(parsedPage) && parsedPage >= 1 ? parsedPage : 1;
   const perPage = 10;
   let coinMarketData: CoinMarketData[] = [];
 
@@ -41,7 +43,7 @@ const Page = async ({ searchParams }: NextPageProps) => {
       cell: (coin) => (
         <>
           #{coin.market_cap_rank}
-          <Link href={`/coins/${coin.id}`} aria-label="View coin" />
+          <Link href={`/coins/${coin.id}`} aria-label={`View ${coin.name}`} />
         </>
       ),
     },
@@ -102,8 +104,11 @@ const Page = async ({ searchParams }: NextPageProps) => {
   ];
 
   const hasMorePages = coinMarketData.length === perPage;
-  const estimatedTotalPages =
-    currentPage >= 100 ? Math.ceil(currentPage / 100) * 100 + 100 : 100;
+  const estimatedTotalPages = hasMorePages
+    ? currentPage >= 100
+      ? Math.ceil(currentPage / 100) * 100 + 100
+      : 100
+    : currentPage;
 
   return (
     <main id="coins-page">
