@@ -31,7 +31,6 @@ const Header = () => {
           >
             Home
           </Link>
-          <p>Search Modal</p>
           <Link
             href="/coins"
             aria-current={pathname === "/coins" ? "page" : undefined}
